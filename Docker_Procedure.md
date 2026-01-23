@@ -210,3 +210,142 @@ docker start ignition832
 * Data persists using Docker volumes
 
 
+
+---
+
+## 1️⃣ If 9088 is not available: how ports work (quickly)
+
+Docker port mapping follows this rule:
+
+```
+-hostPort : containerPort
+```
+
+For Ignition:
+
+* **Container ports NEVER change**
+
+  * `8088` = Gateway HTTP
+  * `8043` = Gateway HTTPS
+* **Host ports CAN be anything that’s free**
+
+So if:
+
+* 8088 ❌
+* 9088 ❌
+
+You just pick another unused port, for example:
+
+* 10088
+* 18088
+* 28088
+
+---
+
+## 2️⃣ Example: Using port **10088** instead
+
+### PowerShell command
+
+```powershell
+docker run -d `
+  --name ignition-latest `
+  -p 10088:8088 `
+  -p 10443:8043 `
+  -e ACCEPT_IGNITION_EULA=Y `
+  -v ignition-latest-data:/usr/local/bin/ignition/data `
+  inductiveautomation/ignition:latest
+```
+
+### Access Ignition at:
+
+```
+http://localhost:10088
+```
+
+✅ Works exactly the same
+✅ Only the URL changes
+
+---
+
+## 3️⃣ Using the **latest version** for personal use
+
+When you use:
+
+```powershell
+inductiveautomation/ignition:latest
+```
+
+Docker will:
+
+* Always pull the **most recent stable Ignition release**
+* Perfect for:
+
+  * Learning
+  * Testing
+  * Personal projects
+  * Non-production use
+
+### Important note
+
+If you restart the container later, it will:
+
+* Use the **already-downloaded version**
+* NOT auto-upgrade unless you explicitly pull again
+
+To update later:
+
+```powershell
+docker pull inductiveautomation/ignition:latest
+```
+
+---
+
+## 4️⃣ Recommended naming for personal-use containers
+
+To avoid confusion later:
+
+```powershell
+--name ignition-personal
+-v ignition-personal-data:/usr/local/bin/ignition/data
+```
+
+This keeps it clearly separate from:
+
+* Work projects
+* Version-pinned containers (like 8.3.2)
+
+---
+
+## 5️⃣ How to find a free port (optional but helpful)
+
+In PowerShell:
+
+```powershell
+netstat -ano | findstr LISTENING
+```
+
+Or just try a high port number:
+
+* Anything above **10000** is usually safe
+
+---
+
+## 6️⃣ Summary (plain English)
+
+* If **9088 is taken**, pick another port (e.g. 10088)
+* The **right side (8088)** never changes
+* `latest` is fine for **personal / learning use**
+* Docker doesn’t auto-update unless you tell it to
+* Only the browser URL changes
+
+---
+
+### Example URLs you might end up with
+
+| Host Port | URL                                              |
+| --------- | ------------------------------------------------ |
+| 8088      | [http://localhost:8088](http://localhost:8088)   |
+| 9088      | [http://localhost:9088](http://localhost:9088)   |
+| 10088     | [http://localhost:10088](http://localhost:10088) |
+| 18088     | [http://localhost:18088](http://localhost:18088) |
+
